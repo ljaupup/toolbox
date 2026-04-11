@@ -3,6 +3,11 @@ const state = {
   payload: null,
   activeTool: null,
   searchText: "",
+  generic: {
+    actionByTool: {},
+    payloadByTool: {},
+    resultByTool: {},
+  },
   ui: {
     formatMode: "json",
     formatOperation: "format",
@@ -36,6 +41,14 @@ function parsePayload(raw) {
 
 function getTools() {
   return state.payload?.tools || [];
+}
+
+function getTool(toolKey) {
+  return getTools().find((item) => item.key === toolKey);
+}
+
+function getDedicatedPane(toolKey) {
+  return document.querySelector(`.tool-pane[data-tool="${toolKey}"]`);
 }
 
 function getToolState(toolId) {
@@ -87,7 +100,7 @@ function renderToolNav() {
 }
 
 function openTool(toolKey) {
-  const tool = getTools().find((item) => item.key === toolKey);
+  const tool = getTool(toolKey);
   if (!tool) {
     showToast("error", `未找到工具：${toolKey}`);
     return;
@@ -95,9 +108,16 @@ function openTool(toolKey) {
 
   state.activeTool = toolKey;
   byId("empty-workspace").classList.remove("active");
-  document.querySelectorAll(".tool-pane").forEach((pane) => {
-    pane.classList.toggle("active", pane.dataset.tool === toolKey);
-  });
+  document.querySelectorAll(".tool-pane").forEach((pane) => pane.classList.remove("active"));
+
+  const pane = getDedicatedPane(toolKey);
+  if (pane) {
+    pane.classList.add("active");
+  } else {
+    byId("generic-tool-pane").classList.add("active");
+    renderGenericPane(toolKey);
+  }
+
   renderToolNav();
   setStatus(`当前工具：${tool.title}`);
 }
@@ -238,6 +258,57 @@ function renderKeygenMode() {
   byId("keygen-run").textContent = labelMap[state.ui.keygenMode] || "生成";
 }
 
+function renderGenericPane(toolKey) {
+  const tool = getTool(toolKey);
+  if (!tool) {
+    return;
+  }
+
+  const toolState = getToolState(toolKey);
+  const actions = Array.isArray(tool.actions) ? tool.actions : [];
+  const select = byId("generic-action-select");
+  const runButton = byId("generic-run");
+  const payloadInput = byId("generic-payload");
+
+  byId("generic-tool-title").textContent = tool.title || tool.key;
+  byId("generic-tool-summary").textContent = tool.summary || "当前插件没有专用页面，使用通用动作调用面板。";
+  byId("generic-status").textContent = toolState.statusText || toolState.message || "待命";
+  byId("generic-state").value = JSON.stringify(toolState, null, 2);
+  byId("generic-result").value = state.generic.resultByTool[toolKey] || "";
+
+  if (!actions.length) {
+    select.innerHTML = '<option value="">暂无可执行动作</option>';
+    select.value = "";
+    runButton.disabled = true;
+    if (document.activeElement !== payloadInput) {
+      payloadInput.value = "{}";
+    }
+    return;
+  }
+
+  const selectedAction = actions.includes(state.generic.actionByTool[toolKey])
+    ? state.generic.actionByTool[toolKey]
+    : actions[0];
+  state.generic.actionByTool[toolKey] = selectedAction;
+
+  select.innerHTML = "";
+  for (const action of actions) {
+    const option = document.createElement("option");
+    option.value = action;
+    option.textContent = action;
+    select.append(option);
+  }
+  select.value = selectedAction;
+  runButton.disabled = false;
+
+  if (!(toolKey in state.generic.payloadByTool)) {
+    state.generic.payloadByTool[toolKey] = "{}";
+  }
+  if (document.activeElement !== payloadInput) {
+    payloadInput.value = state.generic.payloadByTool[toolKey];
+  }
+}
+
 function renderApp(payload) {
   state.payload = payload;
   byId("brand-name").textContent = payload.app.name;
@@ -253,6 +324,10 @@ function renderApp(payload) {
   renderFormatValidator();
   renderKeygen();
   ensureActiveTool();
+
+  if (state.activeTool && !getDedicatedPane(state.activeTool)) {
+    renderGenericPane(state.activeTool);
+  }
 }
 
 function createEmpty(message) {
@@ -495,6 +570,64 @@ function bindUi() {
       await copyToClipboard(source?.value || "");
     });
   });
+
+  byId("generic-action-select").addEventListener("change", () => {
+    if (!state.activeTool) {
+      return;
+    }
+    state.generic.actionByTool[state.activeTool] = byId("generic-action-select").value || "";
+  });
+
+  byId("generic-payload").addEventListener("input", () => {
+    if (!state.activeTool) {
+      return;
+    }
+    state.generic.payloadByTool[state.activeTool] = byId("generic-payload").value;
+  });
+
+  byId("generic-run").addEventListener("click", async () => {
+    const toolKey = state.activeTool;
+    if (!toolKey) {
+      return;
+    }
+
+    const action = state.generic.actionByTool[toolKey] || byId("generic-action-select").value;
+    if (!action) {
+      showToast("error", "当前工具没有可执行动作");
+      return;
+    }
+
+    const rawPayload = byId("generic-payload").value.trim();
+    let payload = {};
+    if (rawPayload) {
+      try {
+        payload = JSON.parse(rawPayload);
+      } catch {
+        showToast("error", "Payload 必须是合法 JSON");
+        return;
+      }
+
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        showToast("error", "Payload 必须是 JSON 对象");
+        return;
+      }
+    }
+
+    state.generic.payloadByTool[toolKey] = rawPayload || "{}";
+    const result = await runAction(toolKey, action, payload);
+    state.generic.resultByTool[toolKey] = JSON.stringify(result, null, 2);
+    renderGenericPane(toolKey);
+  });
+
+  byId("generic-clear").addEventListener("click", () => {
+    const toolKey = state.activeTool;
+    if (!toolKey) {
+      return;
+    }
+    state.generic.resultByTool[toolKey] = "";
+    byId("generic-result").value = "";
+    setStatus("已清空调用返回");
+  });
 }
 
 function initBridge() {
@@ -505,11 +638,11 @@ function initBridge() {
         tagline: "本地工具工作台",
       },
       tools: [
-        { key: "sleep_control", title: "睡眠控制", summary: "倒计时休眠" },
-        { key: "batch_rename", title: "批量重命名", summary: "预览并重命名文件" },
-        { key: "clipboard_history", title: "剪贴板历史", summary: "记录文本剪贴板" },
-        { key: "format_validator", title: "JSON/YAML 格式化", summary: "格式化与校验" },
-        { key: "keygen_tool", title: "密码/密钥工具", summary: "生成密钥与哈希" },
+        { key: "sleep_control", title: "睡眠控制", summary: "倒计时休眠", actions: ["start_countdown", "cancel_plan", "sleep_now"] },
+        { key: "batch_rename", title: "批量重命名", summary: "预览并重命名文件", actions: ["preview", "apply", "clear_preview"] },
+        { key: "clipboard_history", title: "剪贴板历史", summary: "记录文本剪贴板", actions: ["clear", "remove_item", "set_clipboard", "toggle_pin"] },
+        { key: "format_validator", title: "JSON/YAML 格式化", summary: "格式化与校验", actions: ["process", "clear"] },
+        { key: "keygen_tool", title: "密码/密钥工具", summary: "生成密钥与哈希", actions: ["generate_password", "generate_token", "generate_uuid", "hash_text", "clear"] },
       ],
       toolStates: {
         sleep_control: { statusText: "未连接", targetTimeText: "未设定", logs: ["[preview] 未连接 Python bridge。"] },

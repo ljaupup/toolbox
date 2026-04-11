@@ -36,6 +36,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -286,6 +287,7 @@ label,
 }
 
 input,
+select,
 textarea {
   width: 100%;
   max-width: 100%;
@@ -298,6 +300,11 @@ textarea {
 input {
   height: 36px;
   padding: 0 10px;
+}
+
+select {
+  height: 36px;
+  padding: 0 8px;
 }
 
 textarea {
@@ -313,6 +320,7 @@ textarea::placeholder {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary);

@@ -316,6 +316,50 @@
               </section>
             </div>
           </section>
+
+          <section class="tool-pane" data-tool="__generic__" id="generic-tool-pane">
+            <header class="tool-header">
+              <div>
+                <h2 id="generic-tool-title">插件工具</h2>
+                <p id="generic-tool-summary">当前插件没有专用页面，使用通用动作调用面板。</p>
+              </div>
+            </header>
+
+            <div class="tool-body">
+              <section class="section-block">
+                <h3>动作调用</h3>
+                <div class="form-grid inline-controls">
+                  <label>
+                    <span>动作</span>
+                    <select id="generic-action-select"></select>
+                  </label>
+                </div>
+                <label class="textarea-field">
+                  <span>Payload（JSON 对象）</span>
+                  <textarea id="generic-payload" rows="8" placeholder='例如 {"text":"hello","mode":"upper"}'></textarea>
+                </label>
+                <div class="actions">
+                  <button class="btn primary" id="generic-run">执行动作</button>
+                  <button class="btn secondary" id="generic-clear">清空结果</button>
+                </div>
+                <p class="status-line" id="generic-status">待命</p>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>插件状态</h3>
+                </div>
+                <textarea id="generic-state" rows="12" readonly></textarea>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>调用返回</h3>
+                </div>
+                <textarea id="generic-result" rows="10" readonly></textarea>
+              </section>
+            </div>
+          </section>
         </main>
       </div>
 
