@@ -1,72 +1,77 @@
 # 自定义工具箱
 
-一个基于 Python 的桌面工具箱，采用“Python 能力层 + HTML/CSS/JS 界面层”架构。
+一个本地优先的 Python 桌面工具箱，采用 `Python 能力层 + HTML/CSS/JS 界面层`，并提供基于 `manifest` 的插件自动注册。
 
 ## 核心文档
 
-- 架构说明：`docs/ARCHITECTURE.md`
+- 架构文档：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- 设计文档：[docs/APP_DESIGN.md](docs/APP_DESIGN.md)
+- 已知限制：[docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md)
+- 路线图：[docs/ROADMAP.md](docs/ROADMAP.md)
+
+## 仓库基础信息（GitHub 建议）
+
+- Description: `Plugin-based Python desktop toolbox for local automation and utility workflows.`
+- Topics: `python`, `pyside6`, `qtwebengine`, `desktop-app`, `toolbox`, `plugin-system`, `automation`, `windows`
+- License: [MIT](LICENSE)
 
 ## 技术栈
 
 - Python 3.11+
-- uv（依赖与虚拟环境管理）
 - PySide6 + Qt WebEngine + Qt WebChannel
 - HTML / CSS / JavaScript
-- PyYAML（JSON/YAML 工具）
-
-## 内置工具与使用说明
-
-| 工具                  | 功能                        | 使用说明                                                                                                                                 |
-| --------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `sleep_control`     | 倒计时休眠                  | 输入倒计时分钟数后开始计划；可取消计划；“立即休眠”属于高风险操作，会二次确认。                                                         |
-| `batch_rename`      | 批量重命名                  | 输入目录、命名模板和起始序号；模板支持 `{index}`、`{name}`、`{ext}`、`{date}`、`{time}`；先预览，确认后再执行重命名。          |
-| `clipboard_history` | 剪贴板历史                  | 工具启动后自动记录文本剪贴板；每条记录支持回填、置顶、删除；支持一键清空历史。                                                           |
-| `format_validator`  | JSON/YAML 格式化与校验      | 选择 `JSON` 或 `YAML`，再选择“格式化”或“校验”；格式化结果可复制，校验失败会在状态区反馈错误。                                    |
-| `keygen_tool`       | 密码、Token、UUID、文本哈希 | 选择生成模式；密码支持字符集配置；Token 和 UUID 可直接生成；哈希支持 `md5`、`sha1`、`sha256`、`sha512`；结果可复制到系统剪贴板。 |
+- uv（推荐）或 venv + pip
+- PyYAML
 
 ## 快速开始
 
-本项目使用 `uv` 管理 Python 环境和依赖。第一次使用时按下面步骤操作。
+### 0. 安装 uv（不要省略）
 
-### 1. 安装 uv
-
-如果电脑上还没有 `uv`，在 PowerShell 中执行：
+Windows PowerShell：
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-安装完成后，重新打开 PowerShell，并确认安装成功：
+安装后重开终端并验证：
 
 ```powershell
 uv --version
 ```
 
-### 2. 进入项目目录
-
-```powershell
-cd D:\Desktop\toolbox
-```
-
-### 3. 安装依赖
-
-`uv sync` 会根据 `pyproject.toml` 和 `uv.lock` 自动创建 `.venv` 并安装依赖：
+### 方式 A：使用 uv（推荐）
 
 ```powershell
 uv sync
-```
-
-### 4. 启动应用
-
-```powershell
 uv run python run.py
 ```
 
-说明：项目根目录包含 `uv.toml`，已将 `link-mode` 固定为 `copy`，用于避免 Windows 下缓存目录与项目目录不在同一磁盘时出现 hardlink 警告。
+### 方式 B：不用 uv（venv + pip）
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
+python -m pip install -e .
+python run.py
+```
+
+说明：项目根目录提供 `uv.toml`，默认 `link-mode = "copy"`，用于避免 Windows 跨盘缓存导致的 hardlink warning；缓存目录由你的全局 `UV_CACHE_DIR` 决定。
+
+## 内置工具与使用说明
+
+| 工具 ID               | 功能                   | 使用说明                                                                                                                     |
+| --------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `sleep_control`     | 倒计时休眠             | 输入分钟数执行 `start_countdown`；可 `cancel_plan`；`sleep_now` 为高风险动作，前端会二次确认。                         |
+| `batch_rename`      | 批量重命名             | 输入目录、模板和起始序号，先 `preview` 再 `apply`；模板支持 `{index}`、`{name}`、`{ext}`、`{date}`、`{time}`。 |
+| `clipboard_history` | 剪贴板历史             | 自动记录文本剪贴板；支持回填、置顶、删除、清空。                                                                             |
+| `format_validator`  | JSON/YAML 格式化与校验 | 选择格式和动作后执行 `process`；`clear` 可清空结果。                                                                     |
+| `keygen_tool`       | 密码/密钥工具          | 支持密码、Token、UUID 和哈希生成。                                                                                           |
+| `time_converter`    | 时间戳转换             | 支持 `ts_to_iso` 与 `iso_to_ts` 互转，以及 `now` 获取当前时间。默认走通用插件面板。                                    |
 
 ## 插件化扩展（自动注册）
 
-新增工具无需修改核心列表，只需新增目录：
+新增工具默认不需要修改核心工具列表，只要新增插件目录：
 
 ```text
 src/toolbox_app/plugins/builtin/<tool_id>/
@@ -74,7 +79,14 @@ src/toolbox_app/plugins/builtin/<tool_id>/
   plugin.py
 ```
 
-系统会在启动时自动扫描 `plugins/builtin/*/manifest.json` 并加载。
+启动时会自动扫描 `plugins/builtin/*/manifest.json` 并加载。
+对于没有专用前端页面的插件，应用会自动落到“通用插件面板”执行动作。
+
+可用以下命令验证自动注册结果：
+
+```powershell
+uv run python scripts/list_builtin_plugins.py
+```
 
 ## 项目结构
 
@@ -82,7 +94,6 @@ src/toolbox_app/plugins/builtin/<tool_id>/
 src/
   toolbox_app/
     logging/
-      core.py
     plugins/
       base.py
       registry.py
@@ -93,6 +104,7 @@ src/
         clipboard_history/
         format_validator/
         keygen_tool/
+        time_converter/
     web/
       index.html
       app.css
@@ -100,9 +112,11 @@ src/
     app.py
     bridge.py
     main.py
+scripts/
+  list_builtin_plugins.py
 docs/
   ARCHITECTURE.md
-run.py
-pyproject.toml
-uv.lock
+  APP_DESIGN.md
+  KNOWN_LIMITATIONS.md
+  ROADMAP.md
 ```
