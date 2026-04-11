@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自定义工具箱</title>
+    <link rel="stylesheet" href="./app.css" />
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="app-brand">
+          <div class="app-mark" aria-hidden="true">工</div>
+          <div>
+            <h1 id="brand-name">自定义工具箱</h1>
+            <p id="brand-tagline">本地工具工作台</p>
+          </div>
+        </div>
+
+        <label class="search-box" aria-label="搜索工具">
+          <span>搜索</span>
+          <input id="tool-search" type="search" placeholder="输入工具名称" autocomplete="off" />
+        </label>
+
+        <button class="icon-button" id="settings-button" type="button">设置</button>
+      </header>
+
+      <div class="content-shell">
+        <aside class="tool-sidebar">
+          <div class="sidebar-title">工具</div>
+          <nav class="tool-nav" id="tool-nav" aria-label="工具列表"></nav>
+        </aside>
+
+        <main class="workspace">
+          <section class="empty-workspace" id="empty-workspace">
+            <h2>选择一个工具</h2>
+            <p>从左侧列表选择工具后开始操作。</p>
+          </section>
+
+          <section class="tool-pane" data-tool="sleep_control">
+            <header class="tool-header">
+              <div>
+                <h2>睡眠控制</h2>
+                <p>设置倒计时休眠，或取消当前计划。</p>
+              </div>
+            </header>
+
+            <div class="tool-body">
+              <section class="section-block">
+                <h3>输入</h3>
+                <div class="form-grid">
+                  <label>
+                    <span>倒计时（分钟）</span>
+                    <input id="sleep-duration-minutes" type="number" min="1" max="720" value="20" />
+                  </label>
+                </div>
+              </section>
+
+              <section class="section-block">
+                <h3>操作</h3>
+                <div class="actions">
+                  <button class="btn primary" id="sleep-start-plan">开始倒计时</button>
+                  <button class="btn secondary" id="sleep-cancel-plan">取消计划</button>
+                  <button class="btn danger" id="sleep-now">立即休眠</button>
+                </div>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>结果</h3>
+                  <span class="status-pill" id="sleep-status-text">未启动</span>
+                </div>
+                <div class="summary-row">
+                  <span>预计执行时间</span>
+                  <strong id="sleep-target-time-text">未设定</strong>
+                </div>
+                <div class="log-list" id="sleep-log-stream"></div>
+              </section>
+            </div>
+          </section>
+
+          <section class="tool-pane" data-tool="batch_rename">
+            <header class="tool-header">
+              <div>
+                <h2>批量重命名</h2>
+                <p>预览并执行文件重命名，自动检查冲突。</p>
+              </div>
+            </header>
+
+            <div class="tool-body">
+              <section class="section-block">
+                <h3>输入</h3>
+                <div class="form-grid">
+                  <label>
+                    <span>目标目录</span>
+                    <input id="rename-directory" type="text" placeholder="例如 D:\files" />
+                  </label>
+                  <label>
+                    <span>命名模板</span>
+                    <input id="rename-pattern" type="text" value="{index:03d}_{name}{ext}" />
+                  </label>
+                  <label>
+                    <span>起始序号</span>
+                    <input id="rename-start-index" type="number" min="1" value="1" />
+                  </label>
+                </div>
+                <p class="hint">支持 {index}、{name}、{ext}、{date}、{time}。</p>
+              </section>
+
+              <section class="section-block">
+                <h3>操作</h3>
+                <div class="actions">
+                  <button class="btn primary" id="rename-preview">预览</button>
+                  <button class="btn secondary" id="rename-apply">执行重命名</button>
+                  <button class="btn secondary" id="rename-clear">清空预览</button>
+                </div>
+                <p class="status-line" id="rename-status">待命</p>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>预览结果</h3>
+                  <span class="muted">最多展示 120 条</span>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>原文件名</th>
+                        <th>新文件名</th>
+                      </tr>
+                    </thead>
+                    <tbody id="rename-preview-body"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="tool-pane" data-tool="clipboard_history">
+            <header class="tool-header">
+              <div>
+                <h2>剪贴板历史</h2>
+                <p>自动记录文本剪贴板，支持回填与清理。</p>
+              </div>
+            </header>
+
+            <div class="tool-body">
+              <section class="section-block">
+                <h3>操作</h3>
+                <div class="actions">
+                  <button class="btn secondary" id="clipboard-refresh">刷新</button>
+                  <button class="btn danger" id="clipboard-clear">清空历史</button>
+                </div>
+                <p class="status-line" id="clipboard-status">待命</p>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>历史记录</h3>
+                  <span class="muted">点击回填写入系统剪贴板</span>
+                </div>
+                <div class="list" id="clipboard-list"></div>
+              </section>
+            </div>
+          </section>
+
+          <section class="tool-pane" data-tool="format_validator">
+            <header class="tool-header">
+              <div>
+                <h2>JSON/YAML 格式化</h2>
+                <p>格式化或校验 JSON 与 YAML 内容。</p>
+              </div>
+            </header>
+
+            <div class="tool-body">
+              <section class="section-block">
+                <h3>输入</h3>
+                <div class="form-grid inline-controls">
+                  <label>
+                    <span>格式</span>
+                    <div class="segmented">
+                      <button class="seg-btn active" type="button" data-format-mode="json">JSON</button>
+                      <button class="seg-btn" type="button" data-format-mode="yaml">YAML</button>
+                    </div>
+                  </label>
+                  <label>
+                    <span>操作</span>
+                    <div class="segmented">
+                      <button class="seg-btn active" type="button" data-format-operation="format">格式化</button>
+                      <button class="seg-btn" type="button" data-format-operation="validate">校验</button>
+                    </div>
+                  </label>
+                  <label>
+                    <span>缩进</span>
+                    <input id="format-indent" type="number" min="2" max="8" value="2" />
+                  </label>
+                </div>
+                <label class="textarea-field">
+                  <span>输入内容</span>
+                  <textarea id="format-input" rows="10" placeholder="粘贴 JSON 或 YAML"></textarea>
+                </label>
+              </section>
+
+              <section class="section-block">
+                <h3>操作</h3>
+                <div class="actions">
+                  <button class="btn primary" id="format-run">执行</button>
+                  <button class="btn secondary" id="format-clear">清空</button>
+                </div>
+                <p class="status-line" id="format-status">待命</p>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>输出结果</h3>
+                  <button class="btn small" type="button" data-copy-source="format-output">复制结果</button>
+                </div>
+                <textarea id="format-output" rows="10" readonly></textarea>
+              </section>
+            </div>
+          </section>
+
+          <section class="tool-pane" data-tool="keygen_tool">
+            <header class="tool-header">
+              <div>
+                <h2>密码/密钥工具</h2>
+                <p>生成密码、Token、UUID，或计算文本哈希。</p>
+              </div>
+            </header>
+
+            <div class="tool-body">
+              <section class="section-block">
+                <h3>输入</h3>
+                <label>
+                  <span>模式</span>
+                  <div class="segmented mode-selector">
+                    <button class="seg-btn active" type="button" data-keygen-mode="password">密码</button>
+                    <button class="seg-btn" type="button" data-keygen-mode="token">Token</button>
+                    <button class="seg-btn" type="button" data-keygen-mode="uuid">UUID</button>
+                    <button class="seg-btn" type="button" data-keygen-mode="hash">哈希</button>
+                  </div>
+                </label>
+
+                <div class="mode-panel active" data-keygen-panel="password">
+                  <div class="form-grid inline-controls">
+                    <label>
+                      <span>密码长度</span>
+                      <input id="pwd-length" type="number" min="4" max="128" value="16" />
+                    </label>
+                    <label>
+                      <span>字符集</span>
+                      <div class="checks">
+                        <label><input type="checkbox" id="pwd-upper" checked />大写</label>
+                        <label><input type="checkbox" id="pwd-lower" checked />小写</label>
+                        <label><input type="checkbox" id="pwd-digits" checked />数字</label>
+                        <label><input type="checkbox" id="pwd-symbols" />符号</label>
+                        <label><input type="checkbox" id="pwd-exclude-ambiguous" />排除易混淆</label>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mode-panel" data-keygen-panel="hash">
+                  <div class="form-grid inline-controls">
+                    <label>
+                      <span>算法</span>
+                      <div class="segmented">
+                        <button class="seg-btn active" type="button" data-hash-algorithm="sha256">sha256</button>
+                        <button class="seg-btn" type="button" data-hash-algorithm="sha512">sha512</button>
+                        <button class="seg-btn" type="button" data-hash-algorithm="sha1">sha1</button>
+                        <button class="seg-btn" type="button" data-hash-algorithm="md5">md5</button>
+                      </div>
+                    </label>
+                  </div>
+                  <label class="textarea-field">
+                    <span>哈希文本</span>
+                    <textarea id="hash-input" rows="6" placeholder="输入要哈希的文本"></textarea>
+                  </label>
+                </div>
+              </section>
+
+              <section class="section-block">
+                <h3>操作</h3>
+                <div class="actions">
+                  <button class="btn primary" id="keygen-run">生成</button>
+                  <button class="btn secondary" id="keygen-clear">清空结果</button>
+                </div>
+                <p class="status-line" id="keygen-status">待命</p>
+              </section>
+
+              <section class="section-block result-block">
+                <div class="result-head">
+                  <h3>生成结果</h3>
+                  <button class="btn small" type="button" id="keygen-copy-current">复制当前结果</button>
+                </div>
+                <div class="result-grid">
+                  <label>
+                    <span>密码</span>
+                    <textarea id="keygen-password-output" rows="2" readonly></textarea>
+                  </label>
+                  <label>
+                    <span>Token</span>
+                    <textarea id="keygen-token-output" rows="2" readonly></textarea>
+                  </label>
+                  <label>
+                    <span>UUID</span>
+                    <textarea id="keygen-uuid-output" rows="2" readonly></textarea>
+                  </label>
+                  <label>
+                    <span>哈希</span>
+                    <textarea id="keygen-hash-output" rows="3" readonly></textarea>
+                  </label>
+                </div>
+              </section>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <footer class="statusbar">
+        <span id="status-message">就绪</span>
+        <span id="load-error-summary"></span>
+      </footer>
+    </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

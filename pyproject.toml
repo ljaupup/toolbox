@@ -1,0 +1,31 @@
+[project]
+name = "custom-toolbox"
+version = "0.1.0"
+description = "A modular Python desktop toolbox for personal automation ideas."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "PySide6>=6.8,<7.0",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+custom-toolbox = "toolbox_app.main:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+toolbox_app = [
+    "web/*",
+    "assets/icons/*",
+    "assets/branding/*",
+    "plugins/builtin/*/manifest.json",
+]

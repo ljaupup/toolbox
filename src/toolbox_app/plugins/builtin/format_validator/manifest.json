@@ -1,0 +1,14 @@
+{
+  "id": "format_validator",
+  "name": "JSON/YAML 格式化",
+  "entry": "toolbox_app.plugins.builtin.format_validator.plugin:FormatValidatorPlugin",
+  "summary": "JSON/YAML 格式化与语法校验。",
+  "eyebrow": "DEV TOOL",
+  "version": "0.1.0",
+  "category": "developer",
+  "permissions": [],
+  "ui": {
+    "order": 40,
+    "default_visible": true
+  }
+}

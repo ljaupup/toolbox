@@ -1,0 +1,14 @@
+{
+  "id": "clipboard_history",
+  "name": "剪贴板历史",
+  "entry": "toolbox_app.plugins.builtin.clipboard_history.plugin:ClipboardHistoryPlugin",
+  "summary": "自动记录文本剪贴板，支持回填与清理。",
+  "eyebrow": "PRODUCTIVITY",
+  "version": "0.1.0",
+  "category": "productivity",
+  "permissions": ["clipboard"],
+  "ui": {
+    "order": 30,
+    "default_visible": true
+  }
+}

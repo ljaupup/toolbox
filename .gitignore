@@ -1,0 +1,47 @@
+# Local environment
+.env
+.env.*
+.venv/
+.uv-cache/
+
+# Local runtime/app data
+.data/
+.qtwebengine/
+
+# Python bytecode/cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+
+# Python packaging/build artifacts
+*.egg
+*.egg-info/
+*.whl
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+site/
+
+# Python tooling caches
+.hypothesis/
+.mypy_cache/
+.nox/
+.pyre/
+.pytest_cache/
+.ruff_cache/
+.tox/
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+
+# Editor/IDE
+.idea/
+.vscode/
+
+# Logs
+*.log

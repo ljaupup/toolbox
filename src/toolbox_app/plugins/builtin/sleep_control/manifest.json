@@ -1,0 +1,14 @@
+{
+  "id": "sleep_control",
+  "name": "睡眠控制",
+  "entry": "toolbox_app.plugins.builtin.sleep_control.plugin:SleepControlPlugin",
+  "summary": "仅支持倒计时休眠。",
+  "eyebrow": "SYSTEM POWER",
+  "version": "0.1.0",
+  "category": "system",
+  "permissions": ["power_control"],
+  "ui": {
+    "order": 10,
+    "default_visible": true
+  }
+}
