@@ -24,6 +24,9 @@ class ClipboardHistoryPlugin(ToolPlugin):
         app = QApplication.instance()
         if app is None:
             return
+        if not hasattr(app, "clipboard"):
+            self._status_text = "当前运行环境不支持系统剪贴板"
+            return
 
         self._clipboard = app.clipboard()
         if self._clipboard is None:

@@ -1,0 +1,14 @@
+{
+  "id": "batch_rename",
+  "name": "批量重命名",
+  "entry": "toolbox_app.plugins.builtin.batch_rename.plugin:BatchRenamePlugin",
+  "summary": "按模板预览并批量重命名文件。",
+  "eyebrow": "FILE OPS",
+  "version": "0.1.0",
+  "category": "file",
+  "permissions": ["filesystem_write"],
+  "ui": {
+    "order": 20,
+    "default_visible": true
+  }
+}

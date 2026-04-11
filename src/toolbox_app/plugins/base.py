@@ -69,6 +69,7 @@ class ToolPlugin(QObject):
             "version": self._manifest.version,
             "permissions": self._manifest.permissions,
             "ui": self._manifest.ui,
+            "actions": self.actions(),
         }
 
     def emit_state_changed(self) -> None:
