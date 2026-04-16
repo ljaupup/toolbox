@@ -9,12 +9,6 @@
 - 已知限制：[docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md)
 - 路线图：[docs/ROADMAP.md](docs/ROADMAP.md)
 
-## 仓库基础信息（GitHub 建议）
-
-- Description: `Plugin-based Python desktop toolbox for local automation and utility workflows.`
-- Topics: `python`, `pyside6`, `qtwebengine`, `desktop-app`, `toolbox`, `plugin-system`, `automation`, `windows`
-- License: [MIT](LICENSE)
-
 ## 技术栈
 
 - Python 3.11+
@@ -66,8 +60,8 @@ python run.py
 | `batch_rename`      | 批量重命名             | 输入目录、模板和起始序号，先 `preview` 再 `apply`；模板支持 `{index}`、`{name}`、`{ext}`、`{date}`、`{time}`。 |
 | `clipboard_history` | 剪贴板历史             | 自动记录文本剪贴板；支持回填、置顶、删除、清空。                                                                             |
 | `format_validator`  | JSON/YAML 格式化与校验 | 选择格式和动作后执行 `process`；`clear` 可清空结果。                                                                     |
-| `keygen_tool`       | 密码/密钥工具          | 支持密码、Token、UUID 和哈希生成。                                                                                           |
-| `time_converter`    | 时间戳转换             | 支持 `ts_to_iso` 与 `iso_to_ts` 互转，以及 `now` 获取当前时间。默认走通用插件面板。                                    |
+| `keygen_tool`       | 密码/密钥工具          | 支持密码、Token、UUID 生成；哈希模式支持文本输入，也支持上传文件并计算哈希值。                                               |
+| `time_converter`    | 时间戳转换             | 支持秒/毫秒时间戳与本地/UTC 时间双向转换，`now` 可一键填充当前时间戳。                                                 |
 
 ## 插件化扩展（自动注册）
 
