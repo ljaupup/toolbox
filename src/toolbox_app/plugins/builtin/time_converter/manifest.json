@@ -2,13 +2,14 @@
   "id": "time_converter",
   "name": "时间戳转换",
   "entry": "toolbox_app.plugins.builtin.time_converter.plugin:TimeConverterPlugin",
-  "summary": "时间戳与 ISO 时间互转。",
+  "summary": "秒/毫秒时间戳与本地/UTC 时间互转。",
   "eyebrow": "TIME",
   "version": "0.1.0",
   "category": "developer",
   "permissions": [],
   "ui": {
     "order": 70,
-    "default_visible": true
+    "default_visible": true,
+    "show_state": false
   }
 }

@@ -2,7 +2,7 @@
   "id": "keygen_tool",
   "name": "密码/密钥工具",
   "entry": "toolbox_app.plugins.builtin.keygen_tool.plugin:KeygenToolPlugin",
-  "summary": "生成密码、Token、UUID 与文本哈希。",
+  "summary": "生成密码、Token、UUID 与文本/文件哈希。",
   "eyebrow": "SECURITY",
   "version": "0.1.0",
   "category": "security",

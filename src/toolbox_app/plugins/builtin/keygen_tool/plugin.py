@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import secrets
 import string
@@ -20,7 +22,7 @@ class KeygenToolPlugin(ToolPlugin):
         self._last_hash = ""
 
     def actions(self) -> list[str]:
-        return ["generate_password", "generate_token", "generate_uuid", "hash_text", "clear"]
+        return ["generate_password", "generate_token", "generate_uuid", "hash_text", "hash_file", "clear"]
 
     def invoke(self, action: str, payload: dict[str, Any]) -> dict[str, Any]:
         if action == "generate_password":
@@ -34,6 +36,8 @@ class KeygenToolPlugin(ToolPlugin):
             self._status_text = "已生成 UUID v4"
         elif action == "hash_text":
             self._hash_text(payload)
+        elif action == "hash_file":
+            self._hash_file(payload)
         elif action == "clear":
             self._status_text = "已清空"
             self._last_password = ""
@@ -119,3 +123,31 @@ class KeygenToolPlugin(ToolPlugin):
         hasher.update(text.encode("utf-8"))
         self._last_hash = hasher.hexdigest()
         self._status_text = f"已生成 {algorithm} 哈希"
+
+    def _hash_file(self, payload: dict[str, Any]) -> None:
+        content_b64 = str(payload.get("content_b64", "")).strip()
+        algorithm = str(payload.get("algorithm", "sha256")).strip().lower()
+        filename = str(payload.get("filename", "")).strip()
+
+        if not content_b64:
+            raise ValueError("未提供文件内容")
+
+        supported = {"md5", "sha1", "sha256", "sha512"}
+        if algorithm not in supported:
+            raise ValueError(f"不支持的哈希算法: {algorithm}")
+
+        try:
+            file_bytes = base64.b64decode(content_b64, validate=True)
+        except (ValueError, binascii.Error) as exc:
+            raise ValueError("文件内容编码无效") from exc
+
+        if not file_bytes:
+            raise ValueError("文件为空")
+
+        hasher = hashlib.new(algorithm)
+        hasher.update(file_bytes)
+        self._last_hash = hasher.hexdigest()
+
+        size_kb = len(file_bytes) / 1024
+        file_label = filename or "未命名文件"
+        self._status_text = f"已生成文件哈希（{algorithm}，{file_label}，{size_kb:.1f} KB）"
