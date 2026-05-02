@@ -34,6 +34,9 @@ where = ["src"]
 [tool.setuptools.package-data]
 toolbox_app = [
     "web/*",
+    "web/js/*.js",
+    "web/js/tools/*.js",
+    "assets/README.md",
     "assets/icons/*",
     "assets/branding/*",
     "plugins/builtin/*/manifest.json",

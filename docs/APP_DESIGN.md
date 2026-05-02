@@ -1,9 +1,10 @@
 # 自定义工具箱应用设计说明书
 
-> 版本：v1.1  
-> 适用范围：Windows 桌面端小工具应用  
-> 产品形态：插件化、本地优先、极简工具型桌面应用  
-> 设计基准：当前已实现的插件注册、统一调用、结构化日志、Web UI 工具网格与工具详情页，以及 5 个内置工具能力边界，均以项目架构文档为准 fileciteturn0file0
+> 版本：v1.2
+> 最后更新：2026-05-01
+> 适用范围：Windows 桌面端小工具应用
+> 产品形态：插件化、本地优先、极简工具型桌面应用
+> 设计基准：当前已实现的插件注册、统一调用、结构化日志、Web UI 工具列表与工具详情页，以及 6 个内置工具能力边界，均以项目架构文档为准。
 
 ---
 
@@ -44,8 +45,8 @@
 - 插件自动发现与自动注册
 - 统一调用入口：`invokeTool(tool_id, action, payload)`
 - 结构化日志系统
-- Web UI 工具网格与工具详情页
-- 当前内置工具包括 `sleep_control`、`batch_rename`、`clipboard_history`、`format_validator`、`keygen_tool` fileciteturn0file0
+- Web UI 工具列表与工具详情页
+- 当前内置工具包括 `sleep_control`、`batch_rename`、`clipboard_history`、`format_validator`、`keygen_tool`、`time_converter`
 
 ---
 
@@ -730,7 +731,7 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 第一步：预览
 - 第二步：确认执行
 
-这尤其适用于 `batch_rename`，也与当前能力边界一致 fileciteturn0file0
+这尤其适用于 `batch_rename`，也与当前能力边界一致。
 
 ## 9.4 反馈必须贴近动作发生点
 
@@ -807,7 +808,7 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 已取消计划
 - 系统即将休眠 / 已执行
 
-当前支持的动作包括 `start_countdown`、`cancel_plan`、`sleep_now` fileciteturn0file0
+当前支持的动作包括 `start_countdown`、`cancel_plan`、`sleep_now`。
 
 ## 11.2 Batch Rename
 
@@ -838,7 +839,7 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 已执行重命名
 - 无可执行项目
 
-当前支持的动作包括 `preview`、`apply`、`clear_preview` fileciteturn0file0
+当前支持的动作包括 `preview`、`apply`、`clear_preview`。
 
 ## 11.3 Clipboard History
 
@@ -868,7 +869,7 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 已删除
 - 已清空
 
-当前支持的动作包括 `set_clipboard`、`toggle_pin`、`remove_item`、`clear`，并支持自动捕获文本剪贴板 fileciteturn0file0
+当前支持的动作包括 `set_clipboard`、`toggle_pin`、`remove_item`、`clear`，并支持自动捕获文本剪贴板。
 
 ## 11.4 Format Validator
 
@@ -898,18 +899,20 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 已格式化
 - 第 N 行格式错误
 
-当前支持的动作包括 `process`、`clear`，适用于 JSON / YAML 的格式化与校验 fileciteturn0file0
+当前支持的动作包括 `process`、`clear`，适用于 JSON / YAML 的格式化与校验。
 
 ## 11.5 Keygen Tool
 
 ### 定位
 
-生成密码、Token、UUID，或对文本执行哈希。
+生成密码、Token、UUID，或对文本/文件执行哈希。
 
 ### 页面结构
 
 - 生成功能切换区
 - 参数设置区
+- 哈希文本输入区
+- 哈希文件选择区
 - 生成按钮
 - 输出结果区
 - 复制按钮
@@ -919,6 +922,8 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 
 - 每种生成模式共享同一布局
 - 参数区根据模式切换，但页面骨架不变
+- 哈希模式中，文件输入优先级高于文本输入
+- 文件哈希需要显示文件名和大小，避免用户误判当前输入源
 - 输出结果默认可复制
 - 敏感结果需要注意可见性和清理方式
 
@@ -927,9 +932,42 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 已生成密码
 - 已生成 Token
 - 已生成 UUID
-- 哈希完成
+- 文本哈希完成
+- 文件哈希完成
 
-当前支持的动作包括 `generate_password`、`generate_token`、`generate_uuid`、`hash_text`、`clear` fileciteturn0file0
+当前支持的动作包括 `generate_password`、`generate_token`、`generate_uuid`、`hash_text`、`hash_file`、`clear`。
+
+## 11.6 Time Converter
+
+### 定位
+
+在秒/毫秒时间戳与本地/UTC 时间之间双向转换。
+
+### 页面结构
+
+- 转换方向选择
+- 时间戳单位选择
+- 无时区输入解释方式
+- 输入值文本区
+- 转换按钮
+- 填充当前时间按钮
+- 清空按钮
+- 本地时间、UTC 时间、秒时间戳、毫秒时间戳结果区
+
+### 设计重点
+
+- 不使用原生 `select`，避免 Qt WebEngine 下拉菜单出现白框与渲染不一致问题
+- 时间戳单位需要支持自动识别、秒、毫秒
+- 当前时间展示应与转换结果分区，避免用户误把 Now 当作输入结果
+- 时间字符串应清晰区分本地时间和 UTC 时间
+
+### 反馈
+
+- 转换完成
+- 当前时间已填充
+- 输入为空或格式错误
+
+当前支持的动作包括 `now`、`convert`、`clear`。
 
 ---
 
@@ -958,16 +996,17 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 
 ## 13.1 设置页定位
 
-设置页只管理全局偏好与应用级行为，不承载工具本身功能。
+设置页只管理全局偏好、运行状态与应用级行为，不承载工具本身功能。
 
 ## 13.2 建议内容
 
-- 主题模式（后续可扩展）
-- 日志目录与日志保留策略
-- 默认窗口行为
-- 启动行为
-- 插件配置入口
-- 关于页 / 版本信息
+- 运行概览：应用名、Python 版本、系统平台、插件数量、日志文件规模
+- 本地目录：工作空间、`.data`、日志目录、`.qtwebengine`
+- uv 环境：`UV_CACHE_DIR`、`UV_TOOL_DIR`、`UV_PYTHON_INSTALL_DIR`
+- 插件清单：当前自动注册的工具与摘要
+- 加载错误：插件扫描或加载失败信息
+- 最近日志：最近运行事件摘要
+- 后续可扩展：主题模式、日志保留策略、默认窗口行为、启动行为
 
 ## 13.3 设计原则
 
@@ -975,6 +1014,7 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 不过度复杂
 - 不引入大量二级设置页
 - 风险项单独分区
+- 当前阶段以只读状态中心为主，避免提供没有后端支撑的伪设置
 
 ---
 
@@ -1116,7 +1156,7 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 错误不被静默吞掉
 - 重要结果可回看
 
-以上均与当前架构设计一致 fileciteturn0file0
+以上均与当前架构设计一致。
 
 ---
 
@@ -1185,4 +1225,4 @@ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 - 以统一框架承载不同工具能力
 - 在保持克制的前提下具备稳定、可信的产品质感
 
-这套设计既符合桌面端小工具的使用心智，也能与当前的插件注册、统一调用、结构化日志和内置工具能力自然对齐 fileciteturn0file0
+这套设计既符合桌面端小工具的使用心智，也能与当前的插件注册、统一调用、结构化日志和内置工具能力自然对齐。

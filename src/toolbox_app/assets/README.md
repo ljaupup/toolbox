@@ -1,8 +1,12 @@
-# Assets Directory
+# 资产目录
 
-This directory stores application visual assets.
+该目录存放应用运行时需要使用的视觉资产。
 
-- `icons/`: app/window/tray icon files (`.ico`, `.png`)
-- `branding/`: logos, covers, and design exports
+- `icons/`：应用窗口、托盘、工具等图标文件，例如 `.ico`、`.png`。
+- `branding/`：品牌标识、封面图、设计导出等运行时可用素材。
 
-Keep source design files outside runtime paths. Put only runtime-ready assets here.
+约定：
+
+- 只放运行时需要读取的资产。
+- 源设计文件、临时导出文件和草稿不放入该目录。
+- 应用图标当前使用 `icons/toolbox.ico`。

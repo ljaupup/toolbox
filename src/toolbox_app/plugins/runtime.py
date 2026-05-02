@@ -50,7 +50,12 @@ class ToolRuntime(QObject):
                 message="tool not found",
                 payload=payload,
             )
-            return {"ok": False, "error": f"tool not found: {tool_id}"}
+            return self._error_response(
+                code="TOOL_NOT_FOUND",
+                message=f"tool not found: {tool_id}",
+                tool_id=tool_id,
+                action=action,
+            )
 
         if action not in plugin.actions():
             self._logger.emit(
@@ -64,7 +69,12 @@ class ToolRuntime(QObject):
                 message="action not supported",
                 payload=payload,
             )
-            return {"ok": False, "error": f"action not supported: {action}"}
+            return self._error_response(
+                code="ACTION_NOT_SUPPORTED",
+                message=f"action not supported: {action}",
+                tool_id=tool_id,
+                action=action,
+            )
 
         self._logger.emit(
             level="INFO",
@@ -91,7 +101,7 @@ class ToolRuntime(QObject):
                 message="tool action executed",
                 payload=payload,
             )
-            return {"ok": True, "toolId": tool_id, "action": action, "result": result}
+            return self._success_response(tool_id=tool_id, action=action, result=result)
         except Exception as exc:  # noqa: BLE001
             self._logger.emit(
                 level="ERROR",
@@ -104,7 +114,36 @@ class ToolRuntime(QObject):
                 message=f"{exc}",
                 payload={"payload": payload, "traceback": traceback.format_exc()},
             )
-            return {"ok": False, "error": str(exc)}
+            return self._error_response(
+                code="ACTION_FAILED",
+                message=str(exc),
+                tool_id=tool_id,
+                action=action,
+            )
+
+    @staticmethod
+    def _success_response(*, tool_id: str, action: str, result: dict[str, Any]) -> dict[str, Any]:
+        state = result.get("state") if isinstance(result, dict) else None
+        return {
+            "ok": True,
+            "code": "OK",
+            "message": "操作成功",
+            "toolId": tool_id,
+            "action": action,
+            "result": result,
+            "state": state,
+        }
+
+    @staticmethod
+    def _error_response(*, code: str, message: str, tool_id: str, action: str) -> dict[str, Any]:
+        return {
+            "ok": False,
+            "code": code,
+            "message": message,
+            "error": message,
+            "toolId": tool_id,
+            "action": action,
+        }
 
     def _load_plugins(self) -> None:
         specs, errors = self._registry.discover()

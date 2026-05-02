@@ -1,15 +1,9 @@
 from __future__ import annotations
 
-import base64
-import binascii
-import hashlib
-import secrets
-import string
-import uuid
-from random import SystemRandom
 from typing import Any
 
 from toolbox_app.plugins.base import ToolContext, ToolManifest, ToolPlugin
+from toolbox_app.plugins.builtin.keygen_tool import service
 
 
 class KeygenToolPlugin(ToolPlugin):
@@ -26,18 +20,24 @@ class KeygenToolPlugin(ToolPlugin):
 
     def invoke(self, action: str, payload: dict[str, Any]) -> dict[str, Any]:
         if action == "generate_password":
-            self._generate_password(payload)
+            password, length = service.generate_password(payload)
+            self._last_password = password
+            self._status_text = f"已生成密码（长度 {length}）"
         elif action == "generate_token":
-            byte_count = max(8, min(int(payload.get("bytes", 32)), 128))
-            self._last_token = secrets.token_urlsafe(byte_count)
+            token, byte_count = service.generate_token(payload)
+            self._last_token = token
             self._status_text = f"已生成 token（{byte_count} bytes）"
         elif action == "generate_uuid":
-            self._last_uuid = str(uuid.uuid4())
+            self._last_uuid = service.generate_uuid4()
             self._status_text = "已生成 UUID v4"
         elif action == "hash_text":
-            self._hash_text(payload)
+            digest, algorithm = service.hash_text(payload)
+            self._last_hash = digest
+            self._status_text = f"已生成 {algorithm} 哈希"
         elif action == "hash_file":
-            self._hash_file(payload)
+            digest, algorithm, size_bytes, filename = service.hash_file(payload)
+            self._last_hash = digest
+            self._status_text = f"已生成文件哈希（{algorithm}，{filename}，{size_bytes / 1024:.1f} KB）"
         elif action == "clear":
             self._status_text = "已清空"
             self._last_password = ""
@@ -67,87 +67,3 @@ class KeygenToolPlugin(ToolPlugin):
             "lastUuid": self._last_uuid,
             "lastHash": self._last_hash,
         }
-
-    def _generate_password(self, payload: dict[str, Any]) -> None:
-        length = max(4, min(int(payload.get("length", 16)), 128))
-        use_upper = bool(payload.get("upper", True))
-        use_lower = bool(payload.get("lower", True))
-        use_digits = bool(payload.get("digits", True))
-        use_symbols = bool(payload.get("symbols", False))
-        exclude_ambiguous = bool(payload.get("exclude_ambiguous", False))
-
-        pools: list[str] = []
-        if use_upper:
-            pools.append(string.ascii_uppercase)
-        if use_lower:
-            pools.append(string.ascii_lowercase)
-        if use_digits:
-            pools.append(string.digits)
-        if use_symbols:
-            pools.append("!@#$%^&*()-_=+[]{};:,.?/|~")
-
-        if not pools:
-            raise ValueError("至少选择一种字符类型")
-
-        if exclude_ambiguous:
-            ambiguous = set("O0l1I")
-            pools = ["".join(ch for ch in pool if ch not in ambiguous) for pool in pools]
-            pools = [pool for pool in pools if pool]
-            if not pools:
-                raise ValueError("排除易混淆字符后没有可用字符")
-
-        if length < len(pools):
-            length = len(pools)
-
-        required = [secrets.choice(pool) for pool in pools]
-        combined = "".join(pools)
-        random_part = [secrets.choice(combined) for _ in range(length - len(required))]
-
-        chars = required + random_part
-        SystemRandom().shuffle(chars)
-        self._last_password = "".join(chars)
-        self._status_text = f"已生成密码（长度 {length}）"
-
-    def _hash_text(self, payload: dict[str, Any]) -> None:
-        text = str(payload.get("text", ""))
-        algorithm = str(payload.get("algorithm", "sha256")).strip().lower()
-
-        if not text:
-            raise ValueError("待哈希文本不能为空")
-
-        supported = {"md5", "sha1", "sha256", "sha512"}
-        if algorithm not in supported:
-            raise ValueError(f"不支持的哈希算法: {algorithm}")
-
-        hasher = hashlib.new(algorithm)
-        hasher.update(text.encode("utf-8"))
-        self._last_hash = hasher.hexdigest()
-        self._status_text = f"已生成 {algorithm} 哈希"
-
-    def _hash_file(self, payload: dict[str, Any]) -> None:
-        content_b64 = str(payload.get("content_b64", "")).strip()
-        algorithm = str(payload.get("algorithm", "sha256")).strip().lower()
-        filename = str(payload.get("filename", "")).strip()
-
-        if not content_b64:
-            raise ValueError("未提供文件内容")
-
-        supported = {"md5", "sha1", "sha256", "sha512"}
-        if algorithm not in supported:
-            raise ValueError(f"不支持的哈希算法: {algorithm}")
-
-        try:
-            file_bytes = base64.b64decode(content_b64, validate=True)
-        except (ValueError, binascii.Error) as exc:
-            raise ValueError("文件内容编码无效") from exc
-
-        if not file_bytes:
-            raise ValueError("文件为空")
-
-        hasher = hashlib.new(algorithm)
-        hasher.update(file_bytes)
-        self._last_hash = hasher.hexdigest()
-
-        size_kb = len(file_bytes) / 1024
-        file_label = filename or "未命名文件"
-        self._status_text = f"已生成文件哈希（{algorithm}，{file_label}，{size_kb:.1f} KB）"

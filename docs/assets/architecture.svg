@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="760" viewBox="0 0 1320 760" role="img" aria-labelledby="title desc">
+  <title id="title">自定义工具箱架构图</title>
+  <desc id="desc">展示 PySide6 桌面宿主、Web UI、Bridge、Runtime、Registry、插件和日志系统之间的关系。</desc>
+  <defs>
+    <style>
+      .bg { fill: #f5f6f8; }
+      .panel { fill: #ffffff; stroke: #d8dee8; stroke-width: 2; }
+      .core { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+      .plugin { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2; }
+      .log { fill: #fffbeb; stroke: #d97706; stroke-width: 2; }
+      .text { fill: #1f2328; font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; font-size: 22px; font-weight: 650; }
+      .small { fill: #667085; font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; font-size: 16px; }
+      .mono { fill: #344054; font-family: Consolas, "Microsoft YaHei UI", monospace; font-size: 15px; }
+      .line { stroke: #667085; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #98a2b3; stroke-width: 2; stroke-dasharray: 8 7; fill: none; marker-end: url(#arrow); }
+      .label { fill: #344054; font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; font-size: 14px; font-weight: 600; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#667085" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1320" height="760" rx="0" />
+  <text class="text" x="48" y="56">自定义工具箱架构图</text>
+  <text class="small" x="48" y="84">Python 桌面宿主 + Web UI + 插件运行时 + 本地日志</text>
+
+  <rect class="panel" x="48" y="126" width="260" height="104" rx="10" />
+  <text class="text" x="72" y="166">QApplication</text>
+  <text class="mono" x="72" y="196">main.py</text>
+
+  <rect class="panel" x="48" y="292" width="260" height="118" rx="10" />
+  <text class="text" x="72" y="332">桌面窗口宿主</text>
+  <text class="mono" x="72" y="362">QMainWindow</text>
+  <text class="mono" x="72" y="386">QWebEngineView</text>
+
+  <rect class="core" x="388" y="166" width="332" height="244" rx="10" />
+  <text class="text" x="416" y="208">Web UI</text>
+  <text class="mono" x="416" y="244">index.html</text>
+  <text class="mono" x="416" y="272">app.css</text>
+  <text class="mono" x="416" y="300">app.js -> js/main.js</text>
+  <text class="mono" x="416" y="328">js/renderers.js</text>
+  <text class="mono" x="416" y="356">js/tools/*.js</text>
+
+  <rect class="core" x="810" y="166" width="250" height="118" rx="10" />
+  <text class="text" x="836" y="208">ToolboxBridge</text>
+  <text class="mono" x="836" y="240">bridge.py</text>
+
+  <rect class="core" x="810" y="356" width="250" height="118" rx="10" />
+  <text class="text" x="836" y="398">ToolRuntime</text>
+  <text class="mono" x="836" y="430">plugins/runtime.py</text>
+
+  <rect class="plugin" x="1120" y="296" width="152" height="118" rx="10" />
+  <text class="text" x="1144" y="338">Registry</text>
+  <text class="mono" x="1144" y="370">manifest</text>
+  <text class="mono" x="1144" y="394">entry</text>
+
+  <rect class="plugin" x="388" y="516" width="332" height="142" rx="10" />
+  <text class="text" x="416" y="558">Built-in Tool Plugins</text>
+  <text class="mono" x="416" y="594">plugins/builtin/*</text>
+  <text class="mono" x="416" y="622">plugin.py + service.py</text>
+
+  <rect class="log" x="810" y="540" width="250" height="118" rx="10" />
+  <text class="text" x="836" y="582">LogCore</text>
+  <text class="mono" x="836" y="614">.data/logs</text>
+  <text class="mono" x="836" y="638">events-*.jsonl</text>
+
+  <path class="line" d="M178 230 L178 292" />
+  <path class="line" d="M308 351 L388 288" />
+  <path class="line" d="M720 225 L810 225" />
+  <path class="line" d="M935 284 L935 356" />
+  <path class="line" d="M1060 415 L1120 365" />
+  <path class="line" d="M810 415 L720 586" />
+  <path class="line" d="M935 474 L935 540" />
+  <path class="dash" d="M810 248 L720 320" />
+
+  <text class="label" x="738" y="212">Qt WebChannel</text>
+  <text class="label" x="948" y="326">invoke / state</text>
+  <text class="label" x="1070" y="332">discover</text>
+  <text class="label" x="714" y="542">load plugins</text>
+  <text class="label" x="948" y="520">audit / runtime</text>
+</svg>

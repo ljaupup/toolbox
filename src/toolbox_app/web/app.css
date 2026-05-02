@@ -541,6 +541,51 @@ textarea:focus {
   color: var(--muted);
 }
 
+.kv-list,
+.settings-list {
+  display: grid;
+  gap: 8px;
+}
+
+.kv-row,
+.settings-plugin-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.kv-row span,
+.settings-plugin-row span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.kv-row strong,
+.settings-plugin-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.settings-plugin-row {
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 220px);
+  align-items: start;
+}
+
+.settings-plugin-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .log-list,
 .list {
   display: grid;

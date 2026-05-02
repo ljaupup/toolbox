@@ -1,6 +1,7 @@
 export const state = {
   bridge: null,
   payload: null,
+  settings: null,
   activeTool: null,
   searchText: "",
   generic: {
